@@ -2,7 +2,6 @@ import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 import PicsApiService from './js/pixabay-service';
-import Masonry from 'masonry-layout';
 
   const refs = {
     form: document.querySelector('#search-form'),
@@ -12,7 +11,7 @@ import Masonry from 'masonry-layout';
 
 const PicsApi = new PicsApiService();
 let picture = null;
-// let shownPics = 0;
+let shownPics = 0;
 
 refs.form.addEventListener('submit', onSubmitSearch);
 
@@ -46,7 +45,7 @@ async function onSubmitSearch(e) {
     shownPics = data.hits.length;
     createPicsList(picture);
     lightBox.refresh();
-    // addObserveOrshowEndMessage(data.totalHits);
+    addObserveOrshowEndMessage(data.totalHits);
     onFetchSuccess(data.totalHits);
 
   } catch (error) {
@@ -63,8 +62,8 @@ async function loadMore() {
     createPicsList(picture);
     lightBox.refresh();
 
-    // shownPics += data.hits.length;
-    // addObserveOrshowEndMessage(data.totalHits);
+    shownPics += data.hits.length;
+    addObserveOrshowEndMessage(data.totalHits);
 
   } catch (error) {
     console.log(error);
@@ -133,32 +132,32 @@ function onEmptySearch() {
   Notiflix.Notify.info('Oops, it seems that you searched for nothing) ');
 }
 
-// const infiniteObserver = new IntersectionObserver(
-//     ([entry], observer) => {
-//       if (entry.isIntersecting) {
-//         observer.unobserve(entry.target);
+const infiniteObserver = new IntersectionObserver(
+    ([entry], observer) => {
+      if (entry.isIntersecting) {
+        observer.unobserve(entry.target);
   
-//         loadMore();
-//       }
-//     },
-//     { root: null, rootMargin: '50px', threshold: 0.5 }
-//   );
+        loadMore();
+      }
+    },
+    { root: null, rootMargin: '50px', threshold: 0.5 }
+  );
 
-  // function addObserveOrshowEndMessage(totalHits) {
-  //   if (shownPics < totalHits) {
-  //     addObserve();
-  //   } else {
-  //     showEndMessage();
-  //   }
-  // }
+  function addObserveOrshowEndMessage(totalHits) {
+    if (shownPics < totalHits) {
+      addObserve();
+    } else {
+      showEndMessage();
+    }
+  }
 
-  // function addObserve() {
-  //   const lastCard = document.querySelector('.photo-card:last-child');
+  function addObserve() {
+    const lastCard = document.querySelector('.photo-card:last-child');
   
-  //   if (lastCard) {
-  //     infiniteObserver.observe(lastCard);
-  //   }
-  // }
+    if (lastCard) {
+      infiniteObserver.observe(lastCard);
+    }
+  }
   
   function showEndMessage() {
     refs.endSearchMessage.classList.add('show');
@@ -167,16 +166,3 @@ function onEmptySearch() {
   function hideEndMessage() {
     refs.endSearchMessage.classList.remove('show');
   }
-
-  let msnry = new Masonry( refs.imgContainer, {
-    // options
-    itemSelector: '.photo-card',
-  });
-
-let infScroll = new InfiniteScroll( refs.imgContainer, {
-  // options
-  path: loadMore(),
-  append: '.photo-card',
-  history: false,
-  outlayer: msnry
-});
